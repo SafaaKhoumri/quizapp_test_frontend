@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import logo from '../images/logo.png';
-import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   AppBar,
@@ -10,18 +9,19 @@ import {
   TextField,
   Button,
   Modal,
-  Box,
-  List,
-  ListItem,
-  ListItemText
+  Box
 } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Test3() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { adminEmail, domain, role, level, selectedCompetencies } = location.state || {};
   const [candidates, setCandidates] = useState([{ name: '', email: '' }]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [testName, setTestName] = useState('');
+  const [testLanguage, setTestLanguage] = useState('');
 
   const handleCandidateChange = (index, e) => {
     const { name, value } = e.target;
@@ -34,30 +34,73 @@ function Test3() {
     setCandidates([...candidates, { name: '', email: '' }]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(candidates);
+    const competencyIds = selectedCompetencies.map(comp => comp.id);
+  
+    try {
+      console.log('Submitting test data', {
+        testName,
+        testLanguage,
+        adminEmail,
+        domain,
+        role,
+        level,
+        competencyIds,
+        candidates
+      });
+  
+      // Stocker le test dans la base de données
+      const testResponse = await axios.post('http://localhost:8088/api/tests', {
+        testName,
+        testLanguage,
+        adminEmail,
+        domaineId: domain,
+        roleId: role,
+        levelId: level,
+        competencyIds,
+        candidates
+      });
+  
+      console.log('Test response', testResponse.data);
+  
+      // Envoyer les emails aux candidats
+      await axios.post('http://localhost:8088/api/sendTest', {
+        testName,
+        testLanguage,
+        adminEmail,
+        domaineId: domain,
+        roleId: role,
+        levelId: level,
+        competencyIds,
+        candidates
+      });
+  
+      alert('Emails sent and test stored successfully!');
+    } catch (error) {
+      console.error('Error sending emails and storing test:', error);
+      alert('Failed to send emails and store test.');
+    }
   };
+  
 
   const handleVisualizeTest = async () => {
     try {
-      const competencies = location.state?.selectedCompetencies || [];
-      if (competencies.length === 0) {
+      if (selectedCompetencies.length === 0) {
         throw new Error('No competencies selected');
       }
 
-      const competencyIds = competencies.map(comp => comp.id);
+      const competencyIds = selectedCompetencies.map(comp => comp.id);
       const response = await axios.get('http://localhost:8088/api/questions', {
         params: { competencyIds: competencyIds.join(',') }
       });
-      console.log('Questions fetched:', response.data);
 
       if (Array.isArray(response.data)) {
         setQuestions(response.data);
       } else {
         console.error('Data format error: Expected an array');
       }
-      
+
       setIsModalOpen(true);
     } catch (error) {
       console.error('Error fetching questions:', error);
@@ -88,6 +131,24 @@ function Test3() {
       <Container style={{ backgroundColor: '#fff', padding: 30, borderRadius: 10, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)', width: '50%', margin: '3%', height: 'auto' }}>
         <form onSubmit={handleSubmit}>
           <Typography variant="h2" style={{ fontSize: '1.5em', color: 'rgba(35, 42, 86, 0.66)', textAlign: 'center', paddingBottom: '5%' }}>Inviter des candidats</Typography>
+          <TextField
+            type="text"
+            name="testName"
+            placeholder="Entrer le nom du test"
+            value={testName}
+            onChange={(e) => setTestName(e.target.value)}
+            variant="outlined"
+            style={{ width: '100%', marginBottom: 20, padding: 5, borderRadius: 30, fontSize: '1em' }}
+          />
+          <TextField
+            type="text"
+            name="testLanguage"
+            placeholder="Entrer la langue du test"
+            value={testLanguage}
+            onChange={(e) => setTestLanguage(e.target.value)}
+            variant="outlined"
+            style={{ width: '100%', marginBottom: 20, padding: 5, borderRadius: 30, fontSize: '1em' }}
+          />
           <div style={{ maxHeight: 130, overflowY: 'auto', width: '100%' }}>
             {candidates.map((candidate, index) => (
               <div key={index} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -148,13 +209,11 @@ function Test3() {
                 borderRadius: 2
               }}>
                 <Typography variant="h6" style={{ marginBottom: 10, color: '#000' }}>{q.questionText}</Typography>
-                <List>
-                  {q.choices.map((choice, idx) => (
-                    <ListItem key={idx}>
-                      <ListItemText primary={choice.choiceText} />
-                    </ListItem>
-                  ))}
-                </List>
+                {q.choices.map((choice, idx) => (
+                  <Typography key={idx} variant="body1" style={{ color: '#555' }}>
+                    {choice.choiceText}
+                  </Typography>
+                ))}
               </Box>
             ))
           ) : (

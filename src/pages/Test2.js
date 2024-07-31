@@ -27,7 +27,6 @@ function Test2() {
   const [searchQuery, setSearchQuery] = useState('');
   const [competencies, setCompetencies] = useState([]);
   const [selectedCompetencies, setSelectedCompetencies] = useState([]);
-  const adminId = 1; // Remplacez par l'ID de l'administrateur authentifié
 
   const fetchCompetencies = debounce((query) => {
     axios.get('http://localhost:8088/api/competencies/search', {
@@ -64,19 +63,7 @@ function Test2() {
       alert("Veuillez sélectionner au moins une compétence.");
       return;
     }
-    const testRequest = {
-      testName: form.testName,
-      themeId: form.domain,
-      roleId: form.role,
-      levelId: form.level,
-      competenceIds: selectedCompetencies.map(comp => comp.id),
-      adminId: adminId,
-    };
-    axios.post('http://localhost:8088/api/createTest', testRequest)
-      .then(response => {
-        navigate('/Test3', { state: { testId: response.data.id, selectedCompetencies: selectedCompetencies } });
-      })
-      .catch(error => console.error('Error creating test:', error));
+    navigate('/Test3', { state: { ...form, selectedCompetencies } });
   };
 
   return (

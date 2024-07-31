@@ -7,7 +7,7 @@ import axios from 'axios';
 function Test1() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    testName: '',
+    adminEmail: '',
     domain: '',
     role: '',
     level: '',
@@ -59,7 +59,7 @@ function Test1() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (form.testName && form.domain && form.role && form.level) {
+    if (form.adminEmail && form.domain && form.role && form.level) {
       setError('');
       navigate('/Test2', { state: form });
     } else {
@@ -67,7 +67,7 @@ function Test1() {
     }
   };
 
-  const isFormComplete = form.testName && form.domain && form.role && form.level;
+  const isFormComplete = form.adminEmail && form.domain && form.role && form.level;
 
   return (
     <Box
@@ -122,9 +122,9 @@ function Test1() {
           {error && <Typography color="error">{error}</Typography>}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
             <TextField
-              name="testName"
-              placeholder="Entrer le nom du test"
-              value={form.testName}
+              name="adminEmail"
+              placeholder="Entrer votre email"
+              value={form.adminEmail}
               onChange={handleChange}
               variant="outlined"
               sx={{ padding: 1, fontSize: '1em', margin: 1, width: 'calc(50% - 20px)' }}

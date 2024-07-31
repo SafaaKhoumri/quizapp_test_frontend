@@ -3,12 +3,14 @@ import { TextField, Typography, Box, Button, AppBar, Toolbar } from '@mui/materi
 import logo from '../images/logo.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../UserContext'; // Correct import path
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useUser(); // Use the user context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,14 +21,14 @@ function Login() {
         password
       });
       console.log('Response from server:', response);
+      setUser({ id: response.data.id, email: response.data.email }); // Update the user context
       setMessage('Login successful!');
-      navigate('/test1'); 
+      navigate('/Test1'); 
     } catch (error) {
       console.error('Login failed:', error.response.data);
       setMessage('Login failed. Please check your credentials.');
     }
   };
-  
 
   return (
     <Box
