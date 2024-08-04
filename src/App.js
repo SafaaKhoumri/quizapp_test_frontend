@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { TestProvider } from './TestContext'; // Importez TestProvider
+import { UserProvider } from './UserContext'; // Importez TestProvider
 import Login from './pages/Login'; 
 import Test1 from './pages/Test1';
 import Test2 from './pages/Test2';
@@ -13,7 +13,7 @@ import TestIntroduction from './pages/TestIntroduction';
 function App() {
   return (
     <div className="App">
-      <TestProvider> {/* Entourez vos routes avec TestProvider */}
+      <UserProvider> {/* Entourez vos routes avec TestProvider */}
         <Router>
           <Routes>
             <Route path="/" element={<Navigate to="/Login" />} />
@@ -27,7 +27,7 @@ function App() {
             <Route path="/TestIntroduction" element={<TestIntroduction />} />
           </Routes>
         </Router>
-      </TestProvider>
+      </UserProvider>
     </div>
   );
 }
